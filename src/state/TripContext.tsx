@@ -35,6 +35,11 @@ interface TripContextValue {
   deleteChecklistItem: (itemId: string) => void;
 
   reset: () => void;
+
+  /** 共同編集者の招待コードを発行 */
+  createInvite: () => Promise<string>;
+  /** 招待コードを受諾して旅程に参加し、再読み込み */
+  acceptInvite: (code: string) => Promise<void>;
 }
 
 const TripContext = createContext<TripContextValue | null>(null);
@@ -166,6 +171,16 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     void repo.reset().then(refresh);
   }, [repo, refresh]);
 
+  const createInvite = useCallback(() => repo.createInvite(), [repo]);
+
+  const acceptInvite = useCallback(
+    async (code: string) => {
+      await repo.acceptInvite(code);
+      await refresh();
+    },
+    [repo, refresh],
+  );
+
   const value: TripContextValue = {
     trip,
     loading,
@@ -183,6 +198,8 @@ export function TripProvider({ children }: { children: React.ReactNode }) {
     updateChecklistItem,
     deleteChecklistItem,
     reset,
+    createInvite,
+    acceptInvite,
   };
 
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;

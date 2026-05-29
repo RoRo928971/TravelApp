@@ -77,6 +77,14 @@ export class LocalRepository implements TripRepository {
     this.emit();
   }
 
+  async createInvite(): Promise<string> {
+    throw new Error('招待はクラウドモード（Supabase 設定時）で利用できます');
+  }
+
+  async acceptInvite(): Promise<void> {
+    throw new Error('招待はクラウドモード（Supabase 設定時）で利用できます');
+  }
+
   subscribe(onChange: () => void): () => void {
     this.listeners.add(onChange);
     return () => this.listeners.delete(onChange);

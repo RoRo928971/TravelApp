@@ -1,7 +1,17 @@
 import React from 'react';
 import { SvgXml } from 'react-native-svg';
 
-export type IconName = 'clock' | 'yen' | 'pin' | 'tag' | 'map' | 'swap' | 'trash' | 'chevron' | 'search';
+export type IconName =
+  | 'clock'
+  | 'yen'
+  | 'pin'
+  | 'tag'
+  | 'map'
+  | 'swap'
+  | 'trash'
+  | 'chevron'
+  | 'search'
+  | 'userplus';
 
 const PATHS: Record<IconName, string> = {
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
@@ -13,6 +23,7 @@ const PATHS: Record<IconName, string> = {
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
   chevron: '<path d="M6 9l6 6 6-6"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/>',
+  userplus: '<path d="M15 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>',
 };
 
 interface Props {

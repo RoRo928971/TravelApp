@@ -19,14 +19,19 @@ export class SupabaseRepository implements TripRepository {
   }
 
   async loadTrip(): Promise<Trip> {
-    const { data: trips, error } = await this.db
-      .from('trips')
-      .select('id, title, date_range, nights')
-      .limit(1);
+    let query = this.db.from('trips').select('id, title, date_range, nights');
+    // 招待で参加した旅程など、アクティブな trip が決まっていればそれを優先
+    query = this.tripId ? query.eq('id', this.tripId) : query.order('created_at').limit(1);
+    const { data: trips, error } = await query;
     if (error) throw error;
 
     // まだ旅程が無ければ初期データを作成（初回サインイン時）
     if (!trips || trips.length === 0) {
+      // tripId 指定で見つからなければ指定を解除して再取得
+      if (this.tripId) {
+        this.tripId = null;
+        return this.loadTrip();
+      }
       return this.bootstrap();
     }
 
@@ -157,6 +162,21 @@ export class SupabaseRepository implements TripRepository {
   async reset(): Promise<Trip> {
     // クラウドモードでは破壊的リセットは行わず、現状を返す
     return this.loadTrip();
+  }
+
+  async createInvite(): Promise<string> {
+    if (!this.tripId) await this.loadTrip();
+    if (!this.tripId) throw new Error('旅程が見つかりません');
+    const { data, error } = await this.db.rpc('create_trip_invite', { t: this.tripId });
+    if (error) throw error;
+    return data as string;
+  }
+
+  async acceptInvite(code: string): Promise<void> {
+    const { data, error } = await this.db.rpc('accept_trip_invite', { invite_code: code });
+    if (error) throw error;
+    // 参加した旅程をアクティブにする
+    this.tripId = (data as string) ?? this.tripId;
   }
 
   subscribe(onChange: () => void): () => void {

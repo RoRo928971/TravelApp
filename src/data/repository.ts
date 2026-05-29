@@ -19,6 +19,11 @@ export interface TripRepository {
   deleteChecklistItem(itemId: string): Promise<void>;
   /** 初期状態へ戻す（ローカルモードのデモ用） */
   reset(): Promise<Trip>;
+
+  /** 共同編集者を招待するコードを発行（クラウドモードのみ） */
+  createInvite(): Promise<string>;
+  /** 招待コードを受諾して旅程に参加（クラウドモードのみ） */
+  acceptInvite(code: string): Promise<void>;
   /**
    * リアルタイム変更の購読。相手の編集が入ると onChange が呼ばれる。
    * 戻り値で購読解除する。

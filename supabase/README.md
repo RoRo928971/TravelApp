@@ -24,5 +24,11 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=...
 ## 4. 認証
 現状はメールのマジックリンク（`signInWithOtp`）。**Authentication → Providers → Email** を有効にしてください。
 
-## 5. メンバー招待（今後）
-`trip_members` に二人を登録すると共同編集できます。招待フロー（リンク共有など）は今後実装予定です。
+## 5. メンバー招待（実装済み）
+アプリのヘッダーの「人物＋」アイコンから招待リンクを発行できます。
+
+- `create_trip_invite(trip_id)` … メンバーが招待コードを発行（14 日有効）
+- `accept_trip_invite(code)` … 招待リンクを開いた相手が旅程に参加（`trip_members` に追加）
+
+どちらも `SECURITY DEFINER` 関数で、非メンバーでも安全に参加できるよう RLS を内部で越えます。
+ディープリンクのスキームは `app.json` の `scheme`（`tabinoshiori`）です。

@@ -3,6 +3,7 @@ import {
   Pressable,
   SafeAreaView,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -10,9 +11,13 @@ import {
 } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { colors, fonts, radius } from '../theme';
+import { hasSupabase } from '../config';
+import { buildInviteUrl } from '../lib/invites';
 import { useTrip } from '../state/TripContext';
 import { useToast } from '../state/ToastContext';
 import { Avatar } from '../components/Avatar';
+import { Icon } from '../components/Icon';
+import { InviteHandler } from '../components/InviteHandler';
 import { ItineraryView } from './ItineraryView';
 import { ChecklistView } from './ChecklistView';
 
@@ -25,10 +30,24 @@ const RESET_ICON =
 
 /** アプリ本体。ヘッダー＋タブ＋各ビュー。承認済みモックの構成を踏襲。 */
 export function MainScreen() {
-  const { trip, acting, toggleActing, presence, setTitle, reset } = useTrip();
+  const { trip, acting, toggleActing, presence, setTitle, reset, createInvite } = useTrip();
   const { showToast } = useToast();
   const [tab, setTab] = useState<Tab>('plan');
   const [title, setLocalTitle] = useState(trip?.title ?? '');
+
+  const onInvite = async () => {
+    if (!hasSupabase) {
+      showToast('招待はクラウドモード（Supabase 設定時）で使えます', 'sys');
+      return;
+    }
+    try {
+      const code = await createInvite();
+      const url = buildInviteUrl(code);
+      await Share.share({ message: `「${trip?.title ?? '旅のしおり'}」を一緒に編集しましょう。\n${url}` });
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : '招待の作成に失敗しました', 'sys');
+    }
+  };
 
   if (!trip) return null;
 
@@ -38,6 +57,7 @@ export function MainScreen() {
 
   return (
     <SafeAreaView style={styles.root}>
+      <InviteHandler />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {/* ヘッダー */}
         <View style={styles.header}>
@@ -47,6 +67,9 @@ export function MainScreen() {
               <Text style={styles.brandSmall}>FUTARI TABI · KYOTO</Text>
             </View>
             <View style={styles.headtools}>
+              <Pressable style={styles.resetBtn} onPress={onInvite}>
+                <Icon name="userplus" size={15} color={colors.goldText} strokeWidth={2} />
+              </Pressable>
               <Pressable
                 style={styles.resetBtn}
                 onPress={() => {

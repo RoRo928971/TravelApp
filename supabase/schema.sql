@@ -113,6 +113,71 @@ create policy checklist_all on public.checklist_items for all
   using (public.is_trip_member(trip_id)) with check (public.is_trip_member(trip_id));
 
 -- ------------------------------------------------------------
+-- 招待（リンク共有でもう一人を共同編集に追加）
+-- ------------------------------------------------------------
+create table if not exists public.trip_invites (
+  code        text primary key,
+  trip_id     uuid references public.trips (id) on delete cascade not null,
+  role        member_role not null default 'partner',
+  created_by  uuid references auth.users (id) default auth.uid(),
+  created_at  timestamptz not null default now(),
+  expires_at  timestamptz not null default now() + interval '14 days',
+  used_at     timestamptz,
+  used_by     uuid references auth.users (id)
+);
+
+alter table public.trip_invites enable row level security;
+
+-- 招待行はメンバーのみ参照（受諾は下の関数経由で行うので select は最小限）
+drop policy if exists invites_select on public.trip_invites;
+create policy invites_select on public.trip_invites for select
+  using (public.is_trip_member(trip_id));
+
+-- 招待コードを発行する（メンバーのみ）。短いランダムコードを返す。
+create or replace function public.create_trip_invite(t uuid)
+returns text language plpgsql security definer as $$
+declare
+  new_code text;
+begin
+  if not public.is_trip_member(t) then
+    raise exception 'not a member of this trip';
+  end if;
+  -- 衝突しにくい 10 文字のコード
+  new_code := lower(replace(encode(gen_random_bytes(8), 'base64'), '/', '_'));
+  new_code := left(regexp_replace(new_code, '[^a-z0-9]', '', 'g') || md5(random()::text), 10);
+  insert into public.trip_invites (code, trip_id, created_by)
+    values (new_code, t, auth.uid());
+  return new_code;
+end;
+$$;
+
+-- 招待を受諾する。RLS を越えて自分をメンバーに追加し、trip_id を返す。
+create or replace function public.accept_trip_invite(invite_code text)
+returns uuid language plpgsql security definer as $$
+declare
+  inv public.trip_invites%rowtype;
+begin
+  select * into inv from public.trip_invites where code = invite_code;
+  if not found then
+    raise exception 'invalid invite code';
+  end if;
+  if inv.expires_at < now() then
+    raise exception 'invite expired';
+  end if;
+
+  insert into public.trip_members (trip_id, user_id, role)
+    values (inv.trip_id, auth.uid(), inv.role)
+    on conflict (trip_id, user_id) do nothing;
+
+  update public.trip_invites
+    set used_at = now(), used_by = auth.uid()
+    where code = invite_code and used_at is null;
+
+  return inv.trip_id;
+end;
+$$;
+
+-- ------------------------------------------------------------
 -- Realtime（変更を購読できるようにする）
 -- ------------------------------------------------------------
 alter publication supabase_realtime add table public.trips;
