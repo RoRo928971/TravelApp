@@ -42,3 +42,6 @@ yarn-error.*
 
 # env
 .env
+
+# Claude Code tooling config (local)
+.claude/
