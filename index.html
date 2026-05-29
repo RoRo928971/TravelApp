@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旅のしおり</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* 和紙の色 */
+    --washi:#f4ede0;
+    --washi-deep:#ece2cf;
+    --washi-line:#dccfb3;
+    --sumi:#2b2622;          /* 墨 */
+    --sumi-soft:#5c5347;
+    /* 二人の色 */
+    --you:#27503f;           /* 深緑 */
+    --you-soft:#e3ece5;
+    --partner:#c4622d;       /* 柿色 */
+    --partner-soft:#f6e6d8;
+    --gold:#a9863f;
+    --shadow:rgba(43,38,34,.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Shippori Mincho","Yu Mincho","Hiragino Mincho ProN",serif;
+    color:var(--sumi);
+    background-color:var(--washi);
+    /* 和紙のテクスチャ（繊維と斑） */
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.45) 0, transparent 38%),
+      radial-gradient(circle at 80% 70%, rgba(213,198,165,.35) 0, transparent 42%),
+      repeating-linear-gradient(0deg, rgba(180,160,120,.05) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(180,160,120,.05) 0 1px, transparent 1px 4px);
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 18px 120px;}
+
+  /* ───────── ヘッダー ───────── */
+  header.shiori{
+    text-align:center;
+    padding:34px 0 18px;
+    position:relative;
+  }
+  header.shiori .brand{
+    font-size:38px;font-weight:800;letter-spacing:.32em;
+    margin:0;
+    text-indent:.32em;
+  }
+  header.shiori .sub{
+    font-size:13px;color:var(--sumi-soft);letter-spacing:.5em;
+    margin:6px 0 0;text-indent:.5em;
+  }
+  header.shiori .seal{
+    position:absolute;right:8px;top:30px;
+    width:54px;height:54px;border-radius:8px;
+    border:2px solid var(--partner);
+    color:var(--partner);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;line-height:1.2;
+    transform:rotate(-6deg);
+    opacity:.85;
+    background:rgba(255,255,255,.25);
+  }
+
+  .trip-title{
+    text-align:center;margin:6px 0 4px;
+  }
+  .trip-title input{
+    font-family:inherit;font-size:23px;font-weight:600;color:var(--sumi);
+    text-align:center;border:none;background:transparent;
+    border-bottom:1px dashed transparent;
+    padding:2px 8px;letter-spacing:.08em;width:min(100%,520px);
+  }
+  .trip-title input:hover{border-bottom-color:var(--washi-line);}
+  .trip-title input:focus{outline:none;border-bottom-color:var(--gold);}
+  .trip-dates{text-align:center;font-size:13px;color:var(--sumi-soft);letter-spacing:.18em;margin-bottom:14px;}
+
+  /* ───────── 共同編集バー ───────── */
+  .collab{
+    display:flex;align-items:center;gap:14px;justify-content:center;
+    flex-wrap:wrap;
+    background:rgba(255,255,255,.4);
+    border:1px solid var(--washi-line);
+    border-radius:12px;
+    padding:10px 16px;margin:0 auto 22px;max-width:680px;
+    box-shadow:0 2px 6px var(--shadow);
+  }
+  .presence{display:flex;align-items:center;gap:8px;font-size:13px;}
+  .dot{width:12px;height:12px;border-radius:50%;flex:none;position:relative;}
+  .dot.you{background:var(--you);}
+  .dot.partner{background:var(--partner);}
+  .dot.live::after{
+    content:"";position:absolute;inset:-4px;border-radius:50%;
+    border:2px solid currentColor;opacity:.4;color:inherit;
+    animation:pulse 1.6s infinite ease-out;
+  }
+  .dot.you.live{color:var(--you);}
+  .dot.partner.live{color:var(--partner);}
+  @keyframes pulse{0%{transform:scale(1);opacity:.5;}100%{transform:scale(2.2);opacity:0;}}
+  .presence .name{font-weight:600;}
+  .presence .status{color:var(--sumi-soft);font-size:12px;}
+  .collab .divider{width:1px;height:24px;background:var(--washi-line);}
+  .whoami{font-size:12px;color:var(--sumi-soft);display:flex;align-items:center;gap:8px;}
+  .switch-btn{
+    font-family:inherit;cursor:pointer;border:1px solid var(--washi-line);
+    background:rgba(255,255,255,.6);border-radius:20px;padding:5px 14px;font-size:12px;
+    color:var(--sumi);transition:.2s;
+  }
+  .switch-btn:hover{border-color:var(--gold);}
+  .switch-btn b{font-weight:700;}
+
+  /* ───────── タブ ───────── */
+  .tabs{display:flex;justify-content:center;gap:8px;margin-bottom:22px;}
+  .tab{
+    font-family:inherit;cursor:pointer;font-size:15px;letter-spacing:.12em;
+    border:none;background:transparent;padding:8px 22px;color:var(--sumi-soft);
+    border-bottom:2px solid transparent;transition:.2s;
+  }
+  .tab:hover{color:var(--sumi);}
+  .tab.active{color:var(--sumi);border-bottom-color:var(--gold);font-weight:700;}
+
+  /* ───────── 日タブ ───────── */
+  .day-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;}
+  .day-chip{
+    font-family:inherit;cursor:pointer;border:1px solid var(--washi-line);
+    background:rgba(255,255,255,.45);border-radius:10px;padding:7px 16px;font-size:13px;
+    color:var(--sumi-soft);text-align:center;transition:.2s;line-height:1.3;
+  }
+  .day-chip .d-no{display:block;font-weight:700;font-size:14px;color:var(--sumi);}
+  .day-chip.active{background:var(--sumi);color:var(--washi);border-color:var(--sumi);}
+  .day-chip.active .d-no{color:var(--washi);}
+  .day-chip.add{border-style:dashed;color:var(--gold);}
+
+  /* ───────── タイムライン ───────── */
+  .timeline{position:relative;padding-left:40px;}
+  .timeline::before{
+    content:"";position:absolute;left:14px;top:6px;bottom:24px;width:2px;
+    background:linear-gradient(var(--washi-line),var(--washi-line));
+  }
+  .event{
+    position:relative;margin-bottom:18px;
+    background:rgba(255,255,255,.62);
+    border:1px solid var(--washi-line);border-radius:14px;
+    box-shadow:0 3px 10px var(--shadow);
+    overflow:hidden;
+    border-left:5px solid var(--washi-line);
+  }
+  .event[data-owner="you"]{border-left-color:var(--you);}
+  .event[data-owner="partner"]{border-left-color:var(--partner);}
+  .event::before{
+    content:"";position:absolute;left:-32px;top:18px;width:14px;height:14px;border-radius:50%;
+    background:var(--washi);border:3px solid var(--gold);z-index:1;
+  }
+  .event[data-owner="you"]::before{border-color:var(--you);}
+  .event[data-owner="partner"]::before{border-color:var(--partner);}
+
+  .event .editing-flag{
+    position:absolute;top:10px;right:12px;font-size:11px;
+    padding:2px 9px;border-radius:20px;color:#fff;letter-spacing:.06em;
+    display:none;align-items:center;gap:5px;z-index:2;
+  }
+  .event.is-editing .editing-flag{display:inline-flex;}
+  .editing-flag.you{background:var(--you);}
+  .editing-flag.partner{background:var(--partner);}
+  .editing-flag .mini-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:.3;}}
+
+  .event-body{display:flex;gap:0;}
+  .event .photo{
+    width:120px;flex:none;background:var(--washi-deep);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .event .photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  .event .content{padding:12px 16px;flex:1;min-width:0;}
+  .event .time-row{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .event .time{
+    font-weight:700;font-size:15px;color:var(--sumi);
+    border:none;background:transparent;font-family:inherit;width:62px;
+    border-bottom:1px dashed transparent;
+  }
+  .event .time:hover{border-bottom-color:var(--washi-line);}
+  .event .time:focus{outline:none;border-bottom-color:var(--gold);}
+  .event .ev-name{font-size:17px;font-weight:600;color:var(--sumi);}
+  .event .ev-cat{
+    font-size:11px;color:var(--sumi-soft);border:1px solid var(--washi-line);
+    border-radius:5px;padding:1px 7px;letter-spacing:.05em;
+  }
+  .event .meta{display:flex;flex-wrap:wrap;gap:12px;font-size:12.5px;color:var(--sumi-soft);margin:6px 0;}
+  .event .meta span{display:inline-flex;align-items:center;gap:4px;}
+  .event .stars{color:var(--gold);letter-spacing:1px;}
+  .event .note{
+    width:100%;font-family:inherit;font-size:13px;color:var(--sumi);
+    border:none;border-top:1px dotted var(--washi-line);background:transparent;
+    padding:6px 0 2px;resize:none;line-height:1.6;
+  }
+  .event .note:focus{outline:none;}
+  .event .foot{display:flex;align-items:center;justify-content:space-between;margin-top:6px;gap:10px;}
+  .assignee{display:flex;align-items:center;gap:6px;font-size:12px;}
+  .assignee .who-pill{
+    cursor:pointer;border:1px solid var(--washi-line);border-radius:20px;
+    padding:3px 11px;font-size:11.5px;font-family:inherit;background:rgba(255,255,255,.6);
+    color:var(--sumi-soft);transition:.15s;
+  }
+  .assignee .who-pill.on-you{background:var(--you-soft);color:var(--you);border-color:var(--you);font-weight:600;}
+  .assignee .who-pill.on-partner{background:var(--partner-soft);color:var(--partner);border-color:var(--partner);font-weight:600;}
+  .del-btn{
+    border:none;background:transparent;color:var(--sumi-soft);cursor:pointer;
+    font-family:inherit;font-size:12px;opacity:.6;transition:.15s;
+  }
+  .del-btn:hover{opacity:1;color:var(--partner);}
+
+  .add-event{
+    margin:6px 0 0;display:flex;gap:10px;flex-wrap:wrap;
+  }
+  .add-event button{
+    font-family:inherit;cursor:pointer;border:1px dashed var(--gold);
+    background:rgba(255,255,255,.4);color:var(--gold);border-radius:12px;
+    padding:11px 18px;font-size:14px;transition:.2s;letter-spacing:.06em;
+  }
+  .add-event button:hover{background:rgba(169,134,63,.12);}
+
+  /* ───────── チェックリスト ───────── */
+  .check-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media(max-width:680px){.check-cols{grid-template-columns:1fr;} .event-body{flex-direction:column;} .event .photo{width:100%;height:120px;}}
+  .check-card{
+    background:rgba(255,255,255,.55);border:1px solid var(--washi-line);
+    border-radius:14px;padding:16px 18px;box-shadow:0 3px 10px var(--shadow);
+  }
+  .check-card h3{margin:0 0 12px;font-size:17px;letter-spacing:.1em;display:flex;align-items:center;gap:8px;}
+  .check-card h3 .ico{font-size:18px;}
+  .check-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px dotted var(--washi-line);}
+  .check-item:last-of-type{border-bottom:none;}
+  .check-item input[type=checkbox]{
+    appearance:none;width:18px;height:18px;border:1.5px solid var(--sumi-soft);
+    border-radius:5px;cursor:pointer;flex:none;position:relative;background:rgba(255,255,255,.6);
+  }
+  .check-item input[type=checkbox]:checked{background:var(--you);border-color:var(--you);}
+  .check-item input[type=checkbox]:checked::after{
+    content:"✓";position:absolute;color:#fff;font-size:13px;left:2.5px;top:-2px;
+  }
+  .check-item .txt{flex:1;font-size:14px;border:none;background:transparent;font-family:inherit;color:var(--sumi);border-bottom:1px dashed transparent;padding:1px 2px;}
+  .check-item .txt:hover{border-bottom-color:var(--washi-line);}
+  .check-item .txt:focus{outline:none;border-bottom-color:var(--gold);}
+  .check-item.done .txt{text-decoration:line-through;color:var(--sumi-soft);}
+  .check-item .who-pill{
+    cursor:pointer;border:1px solid var(--washi-line);border-radius:20px;
+    padding:2px 9px;font-size:10.5px;font-family:inherit;background:rgba(255,255,255,.6);
+    color:var(--sumi-soft);flex:none;
+  }
+  .check-item .who-pill.on-you{background:var(--you-soft);color:var(--you);border-color:var(--you);font-weight:600;}
+  .check-item .who-pill.on-partner{background:var(--partner-soft);color:var(--partner);border-color:var(--partner);font-weight:600;}
+  .check-item .del-btn{flex:none;}
+  .add-check{display:flex;gap:6px;margin-top:12px;}
+  .add-check input{
+    flex:1;font-family:inherit;font-size:13px;border:1px solid var(--washi-line);
+    border-radius:8px;padding:7px 10px;background:rgba(255,255,255,.6);color:var(--sumi);
+  }
+  .add-check input:focus{outline:none;border-color:var(--gold);}
+  .add-check button{
+    font-family:inherit;cursor:pointer;border:none;background:var(--sumi);color:var(--washi);
+    border-radius:8px;padding:0 14px;font-size:13px;
+  }
+
+  /* ───────── 検索モーダル ───────── */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(43,38,34,.45);
+    display:none;align-items:flex-start;justify-content:center;z-index:50;
+    padding:60px 16px;backdrop-filter:blur(2px);
+  }
+  .modal-bg.open{display:flex;}
+  .modal{
+    background:var(--washi);background-image:
+      repeating-linear-gradient(0deg, rgba(180,160,120,.05) 0 1px, transparent 1px 3px);
+    border:1px solid var(--washi-line);border-radius:16px;
+    width:min(560px,100%);max-height:80vh;overflow:auto;
+    box-shadow:0 20px 50px rgba(43,38,34,.35);padding:22px 24px;
+  }
+  .modal h3{margin:0 0 4px;font-size:19px;letter-spacing:.1em;}
+  .modal .hint{font-size:12px;color:var(--sumi-soft);margin:0 0 14px;}
+  .search-box{display:flex;gap:8px;margin-bottom:16px;}
+  .search-box input{
+    flex:1;font-family:inherit;font-size:15px;border:1px solid var(--washi-line);
+    border-radius:10px;padding:10px 14px;background:rgba(255,255,255,.7);color:var(--sumi);
+  }
+  .search-box input:focus{outline:none;border-color:var(--gold);}
+  .search-box button{
+    font-family:inherit;cursor:pointer;border:none;background:var(--you);color:#fff;
+    border-radius:10px;padding:0 18px;font-size:14px;
+  }
+  .result{
+    display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;
+    cursor:pointer;border:1px solid transparent;transition:.15s;margin-bottom:6px;
+  }
+  .result:hover{background:rgba(255,255,255,.6);border-color:var(--washi-line);}
+  .result .r-photo{width:64px;height:64px;border-radius:10px;flex:none;overflow:hidden;background:var(--washi-deep);}
+  .result .r-photo img{width:100%;height:100%;object-fit:cover;}
+  .result .r-info{flex:1;min-width:0;}
+  .result .r-name{font-size:15px;font-weight:600;}
+  .result .r-sub{font-size:12px;color:var(--sumi-soft);}
+  .result .r-meta{font-size:11.5px;color:var(--sumi-soft);margin-top:2px;}
+  .result .r-meta .stars{color:var(--gold);}
+  .empty{text-align:center;color:var(--sumi-soft);font-size:13px;padding:24px 0;}
+  .close-x{float:right;cursor:pointer;border:none;background:transparent;font-size:20px;color:var(--sumi-soft);font-family:inherit;line-height:1;}
+
+  footer{text-align:center;font-size:11px;color:var(--sumi-soft);letter-spacing:.2em;margin-top:40px;opacity:.7;}
+
+  /* トースト */
+  .toast{
+    position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--sumi);color:var(--washi);padding:10px 20px;border-radius:30px;
+    font-size:13px;letter-spacing:.06em;opacity:0;transition:.3s;z-index:80;pointer-events:none;
+    box-shadow:0 6px 20px rgba(43,38,34,.4);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast .tdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="shiori">
+    <h1 class="brand">旅のしおり</h1>
+    <p class="sub">二人で綴る、旅の覚え書き</p>
+    <div class="seal">旅<br>の<br>栞</div>
+  </header>
+
+  <div class="trip-title">
+    <input id="tripTitle" value="" placeholder="旅の名前を入力">
+  </div>
+  <div class="trip-dates" id="tripDates"></div>
+
+  <!-- 共同編集バー -->
+  <div class="collab">
+    <div class="presence">
+      <span class="dot you" id="dotYou"></span>
+      <span><span class="name" style="color:var(--you)">あなた</span> <span class="status" id="statusYou">閲覧中</span></span>
+    </div>
+    <div class="divider"></div>
+    <div class="presence">
+      <span class="dot partner" id="dotPartner"></span>
+      <span><span class="name" style="color:var(--partner)">相手</span> <span class="status" id="statusPartner">オンライン</span></span>
+    </div>
+    <div class="divider"></div>
+    <div class="whoami">
+      今あなたは
+      <button class="switch-btn" id="switchUser">操作中：<b id="whoLabel" style="color:var(--you)">あなた</b> ⇄</button>
+    </div>
+  </div>
+
+  <!-- タブ -->
+  <div class="tabs">
+    <button class="tab active" data-tab="itinerary">行程</button>
+    <button class="tab" data-tab="checklist">持ち物・やること</button>
+  </div>
+
+  <!-- 行程ビュー -->
+  <section id="view-itinerary">
+    <div class="day-nav" id="dayNav"></div>
+    <div class="timeline" id="timeline"></div>
+    <div class="add-event">
+      <button id="addPlaceBtn">＋ 場所を検索して追加</button>
+      <button id="addBlankBtn">＋ 空の予定を追加</button>
+    </div>
+  </section>
+
+  <!-- チェックリストビュー -->
+  <section id="view-checklist" style="display:none">
+    <div class="check-cols">
+      <div class="check-card">
+        <h3><span class="ico">🎒</span>持ち物</h3>
+        <div id="listMochimono"></div>
+        <div class="add-check">
+          <input id="addMochiInput" placeholder="持ち物を追加（例：充電器）">
+          <button data-cat="mochimono">追加</button>
+        </div>
+      </div>
+      <div class="check-card">
+        <h3><span class="ico">📝</span>やること</h3>
+        <div id="listYarukoto"></div>
+        <div class="add-check">
+          <input id="addYaruInput" placeholder="やることを追加（例：宿の予約）">
+          <button data-cat="yarukoto">追加</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>旅のしおり ・ 二人で編集する旅行プランナー ・ プロトタイプ</footer>
+</div>
+
+<!-- 場所検索モーダル -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <button class="close-x" id="closeModal">✕</button>
+    <h3>場所をさがす</h3>
+    <p class="hint">地図サービスから写真・評価・営業時間・予算・住所を自動取得します（モック）</p>
+    <div class="search-box">
+      <input id="searchInput" placeholder="お店や観光地を検索（例：温泉、寿司、寺）">
+      <button id="searchBtn">検索</button>
+    </div>
+    <div id="searchResults"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   旅のしおり — 二人で共同編集する旅行プランナー（プロトタイプ）
+   - 単一HTMLで自己完結（外部API・画像なし）
+   - 場所情報はモックDBから自動取得
+   - 共同編集は色分け＋疑似プレゼンスで再現
+   ============================================================ */
+
+/* ---------- カテゴリ別の和テイストSVG写真（外部依存なし） ---------- */
+function placePhoto(cat){
+  const scenes = {
+    "温泉": {sky:"#d9b8a0",a:"#a85d3e",b:"#7d4630",motif:"onsen"},
+    "食事": {sky:"#e9d3a8",a:"#b3733a",b:"#8a5326",motif:"food"},
+    "カフェ":{sky:"#e4d6c0",a:"#9c7b52",b:"#6f5436",motif:"cafe"},
+    "観光": {sky:"#cdd9c8",a:"#4f7a5c",b:"#345740",motif:"shrine"},
+    "宿":  {sky:"#c9d2dc",a:"#5d6b7d",b:"#3c4858",motif:"inn"},
+    "自然": {sky:"#c2d6c0",a:"#5a8a63",b:"#3a6244",motif:"mountain"}
+  };
+  const s = scenes[cat] || scenes["観光"];
+  let motif="";
+  if(s.motif==="onsen") motif=`<path d="M40 88 q4 -14 0 -26 M64 88 q4 -16 0 -28 M88 88 q4 -14 0 -26" stroke="#fff" stroke-width="3" fill="none" opacity=".7" stroke-linecap="round"/><rect x="24" y="86" width="80" height="22" rx="6" fill="${s.b}" opacity=".55"/>`;
+  else if(s.motif==="shrine") motif=`<rect x="30" y="40" width="68" height="9" rx="2" fill="${s.b}"/><rect x="34" y="49" width="60" height="6" fill="${s.b}" opacity=".8"/><rect x="40" y="55" width="9" height="48" fill="${s.b}"/><rect x="79" y="55" width="9" height="48" fill="${s.b}"/>`;
+  else if(s.motif==="food") motif=`<ellipse cx="64" cy="78" rx="40" ry="12" fill="${s.b}" opacity=".5"/><circle cx="64" cy="66" r="22" fill="#fff" opacity=".85"/><circle cx="64" cy="66" r="11" fill="${s.a}"/>`;
+  else if(s.motif==="cafe") motif=`<path d="M44 60 h34 v18 a17 17 0 0 1 -34 0 z" fill="#fff" opacity=".85"/><path d="M78 64 h9 a7 7 0 0 1 0 14 h-2" stroke="#fff" stroke-width="3" fill="none" opacity=".85"/><path d="M54 50 q3 -8 0 -12 M64 50 q3 -8 0 -12" stroke="#fff" stroke-width="2.5" fill="none" opacity=".6" stroke-linecap="round"/>`;
+  else if(s.motif==="inn") motif=`<rect x="34" y="58" width="60" height="46" fill="${s.b}" opacity=".7"/><path d="M28 58 L64 38 L100 58 Z" fill="${s.b}"/><rect x="48" y="74" width="14" height="30" fill="#fff" opacity=".5"/><rect x="66" y="74" width="14" height="30" fill="#fff" opacity=".5"/>`;
+  else if(s.motif==="mountain") motif=`<path d="M16 104 L52 50 L74 82 L92 58 L112 104 Z" fill="${s.b}"/><path d="M44 62 L52 50 L60 62 Z" fill="#fff" opacity=".8"/>`;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+    <rect width="128" height="128" fill="${s.sky}"/>
+    <circle cx="98" cy="30" r="16" fill="#fff" opacity=".35"/>
+    <rect y="78" width="128" height="50" fill="${s.a}" opacity=".6"/>
+    ${motif}
+  </svg>`;
+  return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+}
+
+/* ---------- 場所のモックDB ---------- */
+const PLACE_DB = [
+  {name:"嵐山温泉 渡月の湯",cat:"温泉",rating:4.6,reviews:842,hours:"11:00–22:00",budget:"¥1,200/人",address:"京都府京都市右京区嵐山",tags:["温泉","おんせん","ゆ","風呂"]},
+  {name:"湯の里 ささめき",cat:"温泉",rating:4.4,reviews:311,hours:"6:00–24:00",budget:"¥900/人",address:"京都府京都市左京区鞍馬",tags:["温泉","おんせん","ゆ"]},
+  {name:"寿司割烹 海月",cat:"食事",rating:4.7,reviews:1203,hours:"17:00–23:00",budget:"¥6,000/人",address:"京都府京都市中京区先斗町",tags:["寿司","すし","和食","食事","ごはん","ディナー"]},
+  {name:"おばんざい 京の縁",cat:"食事",rating:4.5,reviews:528,hours:"11:30–14:00, 17:30–22:00",budget:"¥3,500/人",address:"京都府京都市東山区祇園",tags:["和食","おばんざい","食事","ごはん","ランチ"]},
+  {name:"らーめん 月待ち",cat:"食事",rating:4.3,reviews:967,hours:"11:00–翌2:00",budget:"¥1,000/人",address:"京都府京都市下京区四条",tags:["ラーメン","らーめん","麺","食事"]},
+  {name:"茶房 やまぶき",cat:"カフェ",rating:4.6,reviews:415,hours:"10:00–18:00",budget:"¥1,400/人",address:"京都府京都市東山区清水",tags:["カフェ","かふぇ","茶","抹茶","スイーツ","お茶","休憩"]},
+  {name:"珈琲 灯火",cat:"カフェ",rating:4.5,reviews:289,hours:"8:00–20:00",budget:"¥800/人",address:"京都府京都市上京区今出川",tags:["カフェ","かふぇ","珈琲","コーヒー","モーニング"]},
+  {name:"清水寺",cat:"観光",rating:4.8,reviews:25840,hours:"6:00–18:00",budget:"¥400/人",address:"京都府京都市東山区清水1丁目",tags:["寺","てら","観光","清水","お寺","世界遺産"]},
+  {name:"伏見稲荷大社",cat:"観光",rating:4.8,reviews:31002,hours:"24時間",budget:"無料",address:"京都府京都市伏見区深草",tags:["神社","じんじゃ","稲荷","観光","鳥居","お参り"]},
+  {name:"嵐山 竹林の小径",cat:"自然",rating:4.7,reviews:18420,hours:"24時間",budget:"無料",address:"京都府京都市右京区嵯峨",tags:["竹林","自然","嵐山","散歩","観光","景色"]},
+  {name:"鴨川デルタ",cat:"自然",rating:4.6,reviews:6210,hours:"24時間",budget:"無料",address:"京都府京都市左京区出町",tags:["川","かわ","自然","散歩","景色","鴨川"]},
+  {name:"町家の宿 月白",cat:"宿",rating:4.7,reviews:512,hours:"チェックイン15:00",budget:"¥18,000/泊",address:"京都府京都市中京区室町",tags:["宿","やど","ホテル","旅館","泊まる","宿泊"]},
+  {name:"旅館 花あかり",cat:"宿",rating:4.8,reviews:736,hours:"チェックイン16:00",budget:"¥26,000/泊",address:"京都府京都市東山区祇園",tags:["宿","やど","旅館","泊まる","宿泊","温泉宿"]}
+];
+
+/* ---------- ユーザー定義 ---------- */
+const USERS = {
+  you:    {name:"あなた", color:"var(--you)",    cls:"you"},
+  partner:{name:"相手",   color:"var(--partner)",cls:"partner"}
+};
+
+/* ---------- 初期データ ---------- */
+function seedData(){
+  const today = new Date();
+  const fmt = d => `${d.getMonth()+1}/${d.getDate()}`;
+  const d1 = new Date(today);
+  const d2 = new Date(today); d2.setDate(d2.getDate()+1);
+  return {
+    title:"二人の京都ふらり旅",
+    startDate: d1.toISOString().slice(0,10),
+    days:[
+      {label:"1日目", date:fmt(d1), items:[
+        mkItem("10:30","清水寺","観光",4.8,25840,"6:00–18:00","¥400/人","京都府京都市東山区清水1丁目","まずは定番。坂道は歩きやすい靴で","you"),
+        mkItem("12:30","おばんざい 京の縁","食事",4.5,528,"11:30–14:00, 17:30–22:00","¥3,500/人","京都府京都市東山区祇園","予約済み。窓際の席をお願いした","partner"),
+        mkItem("15:00","茶房 やまぶき","カフェ",4.6,415,"10:00–18:00","¥1,400/人","京都府京都市東山区清水","抹茶パフェが名物らしい","partner")
+      ]},
+      {label:"2日目", date:fmt(d2), items:[
+        mkItem("09:00","伏見稲荷大社","観光",4.8,31002,"24時間","無料","京都府京都市伏見区深草","朝のうちに千本鳥居。混む前に","you"),
+        mkItem("12:00","寿司割烹 海月","食事",4.7,1203,"17:00–23:00","¥6,000/人","京都府京都市中京区先斗町","記念日のディナー。要予約","you")
+      ]}
+    ],
+    checklist:[
+      mkCheck("パスポート不要・身分証","mochimono","you",false),
+      mkCheck("モバイルバッテリー","mochimono","partner",false),
+      mkCheck("常備薬","mochimono","you",true),
+      mkCheck("折りたたみ傘","mochimono","partner",false),
+      mkCheck("宿の予約確認","yarukoto","you",true),
+      mkCheck("海月さんに記念日プレート相談","yarukoto","you",false),
+      mkCheck("レンタサイクル予約","yarukoto","partner",false)
+    ]
+  };
+}
+let _id = 1;
+function uid(){ return "id"+(_id++)+"_"+Math.random().toString(36).slice(2,6); }
+function mkItem(time,name,cat,rating,reviews,hours,budget,address,owner){
+  return {id:uid(),time,name,cat,rating,reviews,hours,budget,address,note:"",owner,
+          photo:placePhoto(cat), assignee:owner};
+}
+function mkCheck(text,cat,assignee,done){
+  return {id:uid(),text,cat,assignee,done,owner:assignee};
+}
+
+/* ---------- 状態 ---------- */
+let state;
+let currentUser = "you";
+let activeDay = 0;
+let activeTab = "itinerary";
+let pendingEditTarget = null; // 場所検索の追加先
+
+const STORAGE_KEY = "tabi-no-shiori-v1";
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ state = JSON.parse(raw);
+      // 写真が欠けていたら再生成
+      state.days.forEach(d=>d.items.forEach(it=>{ if(!it.photo) it.photo=placePhoto(it.cat); }));
+      return;
+    }
+  }catch(e){}
+  state = seedData();
+}
+function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+
+/* ---------- レンダリング ---------- */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function renderHeader(){
+  $("#tripTitle").value = state.title;
+  // 日付範囲
+  const start = new Date(state.startDate);
+  const end = new Date(start); end.setDate(end.getDate()+state.days.length-1);
+  const w=["日","月","火","水","木","金","土"];
+  const f = d => `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日(${w[d.getDay()]})`;
+  $("#tripDates").textContent = state.days.length>1 ? `${f(start)} 〜 ${f(end)}　${state.days.length}日間` : f(start);
+}
+
+function renderDayNav(){
+  const nav = $("#dayNav");
+  nav.innerHTML = "";
+  state.days.forEach((d,i)=>{
+    const b = document.createElement("button");
+    b.className = "day-chip"+(i===activeDay?" active":"");
+    b.innerHTML = `<span class="d-no">${d.label}</span><span>${d.date}</span>`;
+    b.onclick = ()=>{ activeDay=i; renderDayNav(); renderTimeline(); };
+    nav.appendChild(b);
+  });
+  const add = document.createElement("button");
+  add.className = "day-chip add";
+  add.innerHTML = `<span class="d-no">＋</span><span>日を追加</span>`;
+  add.onclick = addDay;
+  nav.appendChild(add);
+}
+
+function stars(r){
+  const full = Math.round(r);
+  return "★".repeat(full)+"☆".repeat(5-full);
+}
+
+function renderTimeline(){
+  const tl = $("#timeline");
+  tl.innerHTML = "";
+  const day = state.days[activeDay];
+  if(!day) return;
+  if(day.items.length===0){
+    tl.innerHTML = `<p class="empty" style="padding:30px">まだ予定がありません。下のボタンから追加しましょう。</p>`;
+    return;
+  }
+  // 時刻順に並べる
+  day.items.sort((a,b)=> (a.time||"").localeCompare(b.time||""));
+  day.items.forEach(it=>{
+    const u = USERS[it.owner] || USERS.you;
+    const el = document.createElement("div");
+    el.className = "event";
+    el.dataset.owner = it.owner;
+    el.dataset.id = it.id;
+    const assignCls = it.assignee==="you"?"on-you":(it.assignee==="partner"?"on-partner":"");
+    el.innerHTML = `
+      <span class="editing-flag ${u.cls}"><span class="mini-dot"></span>${u.name}が編集中</span>
+      <div class="event-body">
+        <div class="photo"><img src="${it.photo}" alt=""></div>
+        <div class="content">
+          <div class="time-row">
+            <input class="time" value="${it.time||""}" maxlength="5" placeholder="00:00">
+            <span class="ev-name">${escapeHtml(it.name)}</span>
+            <span class="ev-cat">${it.cat}</span>
+          </div>
+          <div class="meta">
+            <span class="stars" title="${it.rating}（${it.reviews||0}件）">${stars(it.rating)} <span style="color:var(--sumi-soft)">${it.rating}</span></span>
+            <span>🕐 ${escapeHtml(it.hours||"-")}</span>
+            <span>💴 ${escapeHtml(it.budget||"-")}</span>
+            <span>📍 ${escapeHtml(it.address||"-")}</span>
+          </div>
+          <textarea class="note" rows="1" placeholder="メモを書く…">${escapeHtml(it.note||"")}</textarea>
+          <div class="foot">
+            <div class="assignee">
+              <span style="color:var(--sumi-soft);font-size:11px">担当</span>
+              <button class="who-pill ${assignCls}">${it.assignee?USERS[it.assignee].name:"未定"}</button>
+            </div>
+            <button class="del-btn">削除</button>
+          </div>
+        </div>
+      </div>`;
+
+    // 時刻編集
+    const timeInput = el.querySelector(".time");
+    timeInput.addEventListener("focus", ()=>flagEditing(el));
+    timeInput.addEventListener("blur", ()=>{ it.time=timeInput.value; it.owner=currentUser; unflag(el); save(); renderTimeline(); });
+
+    // メモ編集（高さ自動）
+    const note = el.querySelector(".note");
+    autoGrow(note);
+    note.addEventListener("focus", ()=>flagEditing(el));
+    note.addEventListener("input", ()=>autoGrow(note));
+    note.addEventListener("blur", ()=>{ it.note=note.value; it.owner=currentUser; unflag(el); save(); });
+
+    // 担当切替
+    el.querySelector(".who-pill").onclick = ()=>{
+      it.assignee = it.assignee==="you"?"partner":(it.assignee==="partner"?null:"you");
+      it.owner=currentUser; save(); renderTimeline();
+    };
+    // 削除
+    el.querySelector(".del-btn").onclick = ()=>{
+      day.items = day.items.filter(x=>x.id!==it.id); save(); renderTimeline();
+      toast(currentUser, `${USERS[currentUser].name}が予定を削除`);
+    };
+    tl.appendChild(el);
+  });
+}
+
+function flagEditing(el){
+  el.classList.remove("is-editing");
+  el.querySelector(".editing-flag").className = "editing-flag "+USERS[currentUser].cls;
+  el.querySelector(".editing-flag").innerHTML = `<span class="mini-dot"></span>${USERS[currentUser].name}が編集中`;
+  el.classList.add("is-editing");
+  setStatus(currentUser,"編集中…");
+}
+function unflag(el){ el.classList.remove("is-editing"); setStatus(currentUser, currentUser==="you"?"閲覧中":"オンライン"); }
+
+/* ---------- チェックリスト ---------- */
+function renderChecklist(){
+  ["mochimono","yarukoto"].forEach(cat=>{
+    const box = $(cat==="mochimono"?"#listMochimono":"#listYarukoto");
+    box.innerHTML="";
+    state.checklist.filter(c=>c.cat===cat).forEach(c=>{
+      const row = document.createElement("div");
+      row.className = "check-item"+(c.done?" done":"");
+      const assignCls = c.assignee==="you"?"on-you":(c.assignee==="partner"?"on-partner":"");
+      row.innerHTML = `
+        <input type="checkbox" ${c.done?"checked":""}>
+        <input class="txt" value="${escapeHtml(c.text)}">
+        <button class="who-pill ${assignCls}">${c.assignee?USERS[c.assignee].name:"未定"}</button>
+        <button class="del-btn">✕</button>`;
+      row.querySelector("input[type=checkbox]").onchange = e=>{ c.done=e.target.checked; c.owner=currentUser; save(); renderChecklist(); };
+      const txt = row.querySelector(".txt");
+      txt.addEventListener("blur", ()=>{ c.text=txt.value; c.owner=currentUser; save(); });
+      txt.addEventListener("focus", ()=>setStatus(currentUser,"編集中…"));
+      row.querySelector(".who-pill").onclick = ()=>{
+        c.assignee = c.assignee==="you"?"partner":(c.assignee==="partner"?null:"you");
+        c.owner=currentUser; save(); renderChecklist();
+      };
+      row.querySelector(".del-btn").onclick = ()=>{ state.checklist=state.checklist.filter(x=>x.id!==c.id); save(); renderChecklist(); };
+      box.appendChild(row);
+    });
+  });
+}
+function addCheck(cat,text){
+  if(!text.trim()) return;
+  state.checklist.push(mkCheck(text.trim(),cat,currentUser,false));
+  save(); renderChecklist();
+  toast(currentUser, `${USERS[currentUser].name}が「${text.trim()}」を追加`);
+}
+
+/* ---------- 場所検索モーダル ---------- */
+function openSearch(){
+  pendingEditTarget = {day:activeDay};
+  $("#searchInput").value="";
+  $("#searchResults").innerHTML = `<p class="empty">行きたい場所を検索してください</p>`;
+  $("#modalBg").classList.add("open");
+  setTimeout(()=>$("#searchInput").focus(),50);
+}
+function closeSearch(){ $("#modalBg").classList.remove("open"); }
+function doSearch(){
+  const q = $("#searchInput").value.trim().toLowerCase();
+  const box = $("#searchResults");
+  if(!q){ box.innerHTML=`<p class="empty">キーワードを入力してください</p>`; return; }
+  const hits = PLACE_DB.filter(p=>
+    p.name.toLowerCase().includes(q) ||
+    p.cat.includes(q) ||
+    p.tags.some(t=>t.toLowerCase().includes(q))
+  );
+  if(hits.length===0){ box.innerHTML=`<p class="empty">「${escapeHtml(q)}」に一致する場所が見つかりませんでした<br><span style="font-size:11px">例：温泉 / 寿司 / 寺 / カフェ / 宿 / 自然</span></p>`; return; }
+  box.innerHTML="";
+  hits.forEach(p=>{
+    const photo = placePhoto(p.cat);
+    const r = document.createElement("div");
+    r.className="result";
+    r.innerHTML = `
+      <div class="r-photo"><img src="${photo}" alt=""></div>
+      <div class="r-info">
+        <div class="r-name">${escapeHtml(p.name)} <span class="ev-cat">${p.cat}</span></div>
+        <div class="r-meta"><span class="stars">${stars(p.rating)}</span> ${p.rating}（${p.reviews.toLocaleString()}件）</div>
+        <div class="r-sub">🕐 ${escapeHtml(p.hours)} ・ 💴 ${escapeHtml(p.budget)}</div>
+        <div class="r-sub">📍 ${escapeHtml(p.address)}</div>
+      </div>`;
+    r.onclick = ()=>selectPlace(p);
+    box.appendChild(r);
+  });
+}
+function selectPlace(p){
+  const day = state.days[pendingEditTarget.day] || state.days[activeDay];
+  // 直前の予定の時刻から1時間後あたりを提案
+  let t = "12:00";
+  if(day.items.length){
+    const last = day.items[day.items.length-1].time || "12:00";
+    const [h,m]=last.split(":").map(Number);
+    t = String((h+2)%24).padStart(2,"0")+":"+String(m||0).padStart(2,"0");
+  }
+  const item = mkItem(t,p.name,p.cat,p.rating,p.reviews,p.hours,p.budget,p.address,currentUser);
+  day.items.push(item);
+  save(); closeSearch();
+  if(activeTab!=="itinerary") switchTab("itinerary");
+  renderTimeline();
+  toast(currentUser, `${USERS[currentUser].name}が「${p.name}」を追加`);
+}
+
+/* ---------- 予定・日の追加 ---------- */
+function addBlankEvent(){
+  const day = state.days[activeDay];
+  const item = mkItem("","新しい予定","観光",0,0,"-","-","",currentUser);
+  item.rating=0;
+  day.items.push(item); save(); renderTimeline();
+}
+function addDay(){
+  const start = new Date(state.startDate);
+  const idx = state.days.length;
+  const d = new Date(start); d.setDate(d.getDate()+idx);
+  state.days.push({label:`${idx+1}日目`, date:`${d.getMonth()+1}/${d.getDate()}`, items:[]});
+  activeDay = idx; save(); renderDayNav(); renderTimeline();
+}
+
+/* ---------- ユーザー切替・プレゼンス ---------- */
+function switchUser(){
+  currentUser = currentUser==="you" ? "partner" : "you";
+  const lbl = $("#whoLabel");
+  lbl.textContent = USERS[currentUser].name;
+  lbl.style.color = USERS[currentUser].color;
+  toast(currentUser, `操作中のユーザーを「${USERS[currentUser].name}」に切替`);
+}
+function setStatus(user,text){
+  $(user==="you"?"#statusYou":"#statusPartner").textContent = text;
+  const dot = $(user==="you"?"#dotYou":"#dotPartner");
+  dot.classList.add("live");
+  clearTimeout(dot._t);
+  dot._t = setTimeout(()=>{
+    dot.classList.remove("live");
+    $(user==="you"?"#statusYou":"#statusPartner").textContent = user==="you"?"閲覧中":"オンライン";
+  }, 2500);
+}
+
+/* ---------- 疑似リアルタイム：相手の動き ---------- */
+const PARTNER_ACTIONS = [
+  ()=>{ // 相手が予定にメモを追記
+    const day = state.days[activeDay];
+    if(!day || !day.items.length) return;
+    const it = day.items[Math.floor(Math.random()*day.items.length)];
+    const memos=["ここ行きたかった所！","写真撮ろうね","少し早めに着きたいな","評価高いね、楽しみ","予算これくらいで大丈夫そう"];
+    const add = memos[Math.floor(Math.random()*memos.length)];
+    it.note = (it.note? it.note+" / ":"")+add;
+    it.owner="partner";
+    const el = document.querySelector(`.event[data-id="${it.id}"]`);
+    if(el){ flagEditingFor("partner", el); setTimeout(()=>{ if(el) el.classList.remove("is-editing"); save(); renderTimeline(); }, 1400); }
+    setStatus("partner","編集中…");
+    toast("partner","相手がメモを追記中…");
+  },
+  ()=>{ // 相手がチェックを完了
+    const undone = state.checklist.filter(c=>!c.done);
+    if(!undone.length) return;
+    const c = undone[Math.floor(Math.random()*undone.length)];
+    c.done=true; c.owner="partner"; save();
+    if(activeTab==="checklist") renderChecklist();
+    setStatus("partner","編集中…");
+    toast("partner",`相手が「${c.text}」を完了`);
+  },
+  ()=>{ setStatus("partner","オンライン"); } // ただのプレゼンス更新
+];
+function flagEditingFor(user,el){
+  const u=USERS[user];
+  const f=el.querySelector(".editing-flag");
+  f.className="editing-flag "+u.cls;
+  f.innerHTML=`<span class="mini-dot"></span>${u.name}が編集中`;
+  el.classList.add("is-editing");
+}
+let partnerTimer;
+function startPartnerSim(){
+  function loop(){
+    const delay = 9000 + Math.random()*9000; // 9〜18秒ごと
+    partnerTimer = setTimeout(()=>{
+      // 操作中が相手でないときだけ動かす（自分が操作中の邪魔をしない程度に）
+      const act = PARTNER_ACTIONS[Math.floor(Math.random()*PARTNER_ACTIONS.length)];
+      try{ act(); }catch(e){}
+      loop();
+    }, delay);
+  }
+  loop();
+}
+
+/* ---------- トースト ---------- */
+let toastTimer;
+function toast(user,msg){
+  const t = $("#toast");
+  t.innerHTML = `<span class="tdot" style="background:${USERS[user].color}"></span>${escapeHtml(msg)}`;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove("show"),2600);
+}
+
+/* ---------- タブ ---------- */
+function switchTab(tab){
+  activeTab=tab;
+  $$(".tab").forEach(b=>b.classList.toggle("active", b.dataset.tab===tab));
+  $("#view-itinerary").style.display = tab==="itinerary"?"":"none";
+  $("#view-checklist").style.display = tab==="checklist"?"":"none";
+}
+
+/* ---------- ユーティリティ ---------- */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); }
+function autoGrow(el){ el.style.height="auto"; el.style.height=(el.scrollHeight)+"px"; }
+
+/* ---------- 初期化 ---------- */
+function init(){
+  load();
+  renderHeader();
+  renderDayNav();
+  renderTimeline();
+  renderChecklist();
+
+  $("#tripTitle").addEventListener("blur", e=>{ state.title=e.target.value; save(); });
+  $$(".tab").forEach(b=> b.onclick=()=>switchTab(b.dataset.tab));
+  $("#switchUser").onclick = switchUser;
+  $("#addPlaceBtn").onclick = openSearch;
+  $("#addBlankBtn").onclick = addBlankEvent;
+  $("#closeModal").onclick = closeSearch;
+  $("#modalBg").onclick = e=>{ if(e.target.id==="modalBg") closeSearch(); };
+  $("#searchBtn").onclick = doSearch;
+  $("#searchInput").addEventListener("keydown", e=>{ if(e.key==="Enter") doSearch(); });
+  $$(".add-check button").forEach(btn=>{
+    btn.onclick = ()=>{
+      const cat=btn.dataset.cat;
+      const input = $(cat==="mochimono"?"#addMochiInput":"#addYaruInput");
+      addCheck(cat, input.value); input.value="";
+    };
+  });
+  ["#addMochiInput","#addYaruInput"].forEach(sel=>{
+    $(sel).addEventListener("keydown", e=>{ if(e.key==="Enter") e.target.nextElementSibling.click(); });
+  });
+
+  startPartnerSim();
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
