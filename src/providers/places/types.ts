@@ -15,8 +15,16 @@ export interface PlaceResult {
   photoUrl?: string | null;
 }
 
+/** 検索オプション（地域指定）。near か ll のどちらかを指定できる。 */
+export interface SearchOptions {
+  /** 地名での絞り込み（例: '京都', 'Tokyo, Japan'） */
+  near?: string;
+  /** 緯度経度での絞り込み（例: '35.0116,135.7681'）。near より優先 */
+  ll?: string;
+}
+
 /** 場所検索プロバイダの共通インターフェース（Foursquare / Mock を差し替え可能に） */
 export interface PlacesProvider {
   readonly id: string;
-  search(query: string): Promise<PlaceResult[]>;
+  search(query: string, options?: SearchOptions): Promise<PlaceResult[]>;
 }

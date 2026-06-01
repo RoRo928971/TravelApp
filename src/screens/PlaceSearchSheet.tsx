@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { colors, fonts, radius } from '../theme';
-import { getPlacesProvider, type PlaceResult } from '../providers/places';
+import { DEFAULT_REGION, getPlacesProvider, type PlaceResult } from '../providers/places';
 import { useTrip } from '../state/TripContext';
 import { useToast } from '../state/ToastContext';
 import { SceneThumb } from '../components/SceneThumb';
@@ -26,6 +26,7 @@ export function PlaceSearchSheet({ visible, dayId, onClose }: Props) {
   const { addStopFromPlace } = useTrip();
   const { showToast } = useToast();
   const [query, setQuery] = useState('');
+  const [region, setRegion] = useState(DEFAULT_REGION);
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -42,7 +43,7 @@ export function PlaceSearchSheet({ visible, dayId, onClose }: Props) {
     setLoading(true);
     const handle = setTimeout(async () => {
       try {
-        const r = await getPlacesProvider().search(query);
+        const r = await getPlacesProvider().search(query, { near: region });
         if (active) setResults(r);
       } catch {
         if (active) setResults([]);
@@ -54,7 +55,7 @@ export function PlaceSearchSheet({ visible, dayId, onClose }: Props) {
       active = false;
       clearTimeout(handle);
     };
-  }, [query, visible]);
+  }, [query, region, visible]);
 
   const onSelect = (p: PlaceResult) => {
     if (!dayId) return;
@@ -89,6 +90,19 @@ export function PlaceSearchSheet({ visible, dayId, onClose }: Props) {
             autoFocus
           />
         </View>
+
+        <View style={styles.regionbar}>
+          <Icon name="pin" size={15} color={colors.inkSoft} />
+          <Text style={styles.regionLabel}>地域</Text>
+          <TextInput
+            value={region}
+            onChangeText={setRegion}
+            placeholder="例: 京都、Tokyo, Japan"
+            placeholderTextColor={colors.inkSoft}
+            style={styles.regionInput}
+          />
+        </View>
+
         <Text style={styles.hint}>📍 地図サービスから写真とお店情報を自動取得します</Text>
 
         <View style={styles.results}>
@@ -146,6 +160,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13,
   },
   input: { flex: 1, fontFamily: fonts.gothic, fontSize: 14, color: colors.ink, padding: 0 },
+  regionbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7,
+    marginTop: 8,
+    paddingHorizontal: 4,
+  },
+  regionLabel: { fontSize: 12, color: colors.inkSoft, fontFamily: fonts.gothic },
+  regionInput: { flex: 1, fontFamily: fonts.gothicMedium, fontSize: 13, color: colors.ink, padding: 0 },
   hint: { fontSize: 11, color: colors.inkSoft, marginTop: 10, marginBottom: 4, fontFamily: fonts.gothic },
   results: { marginTop: 4 },
   result: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.line },

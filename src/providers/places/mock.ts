@@ -1,4 +1,4 @@
-import type { PlacesProvider, PlaceResult } from './types';
+import type { PlacesProvider, PlaceResult, SearchOptions } from './types';
 
 /** モックの場所DB（承認済みモックの placeDB を移植） */
 const DB: PlaceResult[] = [
@@ -14,7 +14,8 @@ const DB: PlaceResult[] = [
 export class MockPlacesProvider implements PlacesProvider {
   readonly id = 'mock';
 
-  async search(query: string): Promise<PlaceResult[]> {
+  // モックは地域指定(options)を無視する
+  async search(query: string, _options?: SearchOptions): Promise<PlaceResult[]> {
     const q = query.trim();
     // 地図サービス風に少しだけ遅延させる
     await new Promise((r) => setTimeout(r, 400));
