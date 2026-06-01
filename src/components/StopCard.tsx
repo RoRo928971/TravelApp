@@ -13,6 +13,7 @@ import { colors, fonts, radius, roleColor } from '../theme';
 import type { MemberRole, Stop } from '../types/models';
 import { useTrip } from '../state/TripContext';
 import { useToast } from '../state/ToastContext';
+import { usePresence } from '../state/PresenceContext';
 import { SceneThumb } from './SceneThumb';
 import { Icon } from './Icon';
 
@@ -26,6 +27,7 @@ const INI: Record<MemberRole, string> = { me: 'ハ', partner: 'ユ' };
 export function StopCard({ stop, last }: { stop: Stop; last: boolean }) {
   const { acting, updateStop, deleteStop, toggleStopOwner, setPresence, idlePresence } = useTrip();
   const { showToast } = useToast();
+  const { partnerEditingStopId, partnerName, reportEditing } = usePresence();
   const [open, setOpen] = useState(false);
   const [time, setTime] = useState(stop.time);
   const [place, setPlace] = useState(stop.place);
@@ -33,15 +35,22 @@ export function StopCard({ stop, last }: { stop: Stop; last: boolean }) {
   const [editing, setEditing] = useState(false);
 
   const ownerColor = roleColor[stop.by];
-  const editFlagColor = roleColor[acting];
+
+  // 相手がこの予定を編集中か（リアルタイム presence 由来）
+  const remoteEditing = partnerEditingStopId === stop.id;
+  const showFlag = editing || remoteEditing;
+  const flagColor = editing ? roleColor[acting] : roleColor.partner;
+  const flagName = editing ? NAME[acting] : partnerName ?? NAME.partner;
 
   const beginEdit = () => {
     setEditing(true);
     setPresence(`${NAME[acting]}さんが編集中…`);
+    reportEditing({ kind: 'stop', id: stop.id, label: stop.place });
   };
   const endEdit = (patch: Partial<Stop>) => {
     setEditing(false);
     idlePresence();
+    reportEditing(null);
     updateStop({ ...stop, ...patch });
   };
 
@@ -67,10 +76,16 @@ export function StopCard({ stop, last }: { stop: Stop; last: boolean }) {
       </View>
 
       {/* カード */}
-      <View style={[styles.card, { borderLeftColor: ownerColor, borderLeftWidth: 4 }, editing && styles.cardEditing]}>
-        {editing && (
-          <View style={[styles.editflag, { backgroundColor: editFlagColor }]}>
-            <Text style={styles.editflagText}>{NAME[acting]} 編集中</Text>
+      <View
+        style={[
+          styles.card,
+          { borderLeftColor: ownerColor, borderLeftWidth: 4 },
+          showFlag && { borderColor: flagColor },
+        ]}
+      >
+        {showFlag && (
+          <View style={[styles.editflag, { backgroundColor: flagColor }]}>
+            <Text style={styles.editflagText}>{flagName} 編集中</Text>
           </View>
         )}
 
@@ -200,7 +215,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     overflow: 'hidden',
   },
-  cardEditing: { borderColor: colors.persimmon },
   editflag: {
     position: 'absolute',
     top: 0,

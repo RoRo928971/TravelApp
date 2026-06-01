@@ -25,6 +25,7 @@ import { colors } from './src/theme';
 import { useAuth } from './src/hooks/useAuth';
 import { ToastProvider } from './src/state/ToastContext';
 import { TripProvider } from './src/state/TripContext';
+import { PresenceProvider } from './src/state/PresenceContext';
 import { MainScreen } from './src/screens/MainScreen';
 import { AuthScreen } from './src/screens/AuthScreen';
 
@@ -38,7 +39,9 @@ function Gate() {
   return (
     <ToastProvider>
       <TripProvider>
-        <MainScreen />
+        <PresenceProvider>
+          <MainScreen />
+        </PresenceProvider>
       </TripProvider>
     </ToastProvider>
   );

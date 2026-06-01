@@ -15,6 +15,7 @@ import { hasSupabase } from '../config';
 import { buildInviteUrl } from '../lib/invites';
 import { useTrip } from '../state/TripContext';
 import { useToast } from '../state/ToastContext';
+import { usePresence } from '../state/PresenceContext';
 import { Avatar } from '../components/Avatar';
 import { Icon } from '../components/Icon';
 import { InviteHandler } from '../components/InviteHandler';
@@ -32,6 +33,7 @@ const RESET_ICON =
 export function MainScreen() {
   const { trip, acting, toggleActing, presence, setTitle, reset, createInvite } = useTrip();
   const { showToast } = useToast();
+  const { partnerOnline, partnerStatusText } = usePresence();
   const [tab, setTab] = useState<Tab>('plan');
   const [title, setLocalTitle] = useState(trip?.title ?? '');
 
@@ -106,8 +108,8 @@ export function MainScreen() {
             いま操作中： <Text style={styles.actingName}>{acting === 'me' ? 'ハル' : 'ユカリ'}</Text>（アバターで交代）
           </Text>
           <View style={styles.presence}>
-            <View style={styles.pulse} />
-            <Text style={styles.presenceText}>{presence}</Text>
+            <View style={[styles.pulse, !partnerOnline && styles.pulseOffline]} />
+            <Text style={styles.presenceText}>{partnerStatusText ?? presence}</Text>
           </View>
         </View>
 
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
   actingName: { color: colors.cream, fontFamily: fonts.gothicBold },
   presence: { marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
   pulse: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.persimmon },
+  pulseOffline: { backgroundColor: colors.inkSoft, opacity: 0.5 },
   presenceText: { fontSize: 12, color: colors.goldText, fontFamily: fonts.gothic },
   tabs: { flexDirection: 'row', gap: 6, paddingHorizontal: 18, paddingTop: 14, backgroundColor: colors.paper },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 7, paddingVertical: 12, paddingBottom: 14 },
